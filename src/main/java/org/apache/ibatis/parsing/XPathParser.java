@@ -46,10 +46,25 @@ import org.xml.sax.SAXParseException;
  */
 public class XPathParser {
 
+  /**
+   * 文档对象
+   */
   private final Document document;
+  /**
+   * 是否需要验证文档格式
+   */
   private boolean validation;
+  /**
+   * 该对象用于获取约束文件
+   */
   private EntityResolver entityResolver;
+  /**
+   * 保存用于替换占位符的变量
+   */
   private Properties variables;
+  /**
+   * 解析xpath
+   */
   private XPath xpath;
 
   public XPathParser(String xml) {
