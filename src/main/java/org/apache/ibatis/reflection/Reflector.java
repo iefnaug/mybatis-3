@@ -49,22 +49,50 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  */
 public class Reflector {
 
+  /**
+   * 反射的类型
+   */
   private final Class<?> type;
+  /**
+   * 可读属性
+   */
   private final String[] readablePropertyNames;
+  /**
+   * 可写属性
+   */
   private final String[] writablePropertyNames;
+  /**
+   * setter方法
+   */
   private final Map<String, Invoker> setMethods = new HashMap<>();
+  /**
+   * getter方法
+   */
   private final Map<String, Invoker> getMethods = new HashMap<>();
+  /**
+   * setter入参类型
+   */
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+  /**
+   * getter返回类型
+   */
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+  /**
+   * 默认构造方法
+   */
   private Constructor<?> defaultConstructor;
 
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
     type = clazz;
+    //获取默认构造方法
     addDefaultConstructor(clazz);
+    //获取getter方法，需要检测方法冲突
     addGetMethods(clazz);
+    //获取setter方法，需要检测方法冲突
     addSetMethods(clazz);
+    //如果对应的字段没有getter,setter方法,会添加对应的Invoker
     addFields(clazz);
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
@@ -90,6 +118,10 @@ public class Reflector {
     resolveGetterConflicts(conflictingGetters);
   }
 
+  /**
+   * 由于父类和子类可能定义相同的方法，这里需要解决冲突
+   * @param conflictingGetters
+   */
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
       Method winner = null;
