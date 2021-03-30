@@ -40,17 +40,36 @@ public class PooledDataSource implements DataSource {
 
   private static final Log log = LogFactory.getLog(PooledDataSource.class);
 
+  /**
+   * 数据库连接池状态
+   */
   private final PoolState state = new PoolState(this);
 
   private final UnpooledDataSource dataSource;
 
   // OPTIONAL CONFIGURATION FIELDS
+
+  /**
+   * 最大活跃连接数
+   */
   protected int poolMaximumActiveConnections = 10;
+  /**
+   * 最大空闲连接数
+   */
   protected int poolMaximumIdleConnections = 5;
   protected int poolMaximumCheckoutTime = 20000;
+  /**
+   * 获取一个连接的等待时间，如果超时未获取，会日志记录，并重新再次获取
+   */
   protected int poolTimeToWait = 20000;
   protected int poolMaximumLocalBadConnectionTolerance = 3;
+  /**
+   * 连接测试SQL
+   */
   protected String poolPingQuery = "NO PING QUERY SET";
+  /**
+   * 是否开启连接测试
+   */
   protected boolean poolPingEnabled;
   protected int poolPingConnectionsNotUsedFor;
 
