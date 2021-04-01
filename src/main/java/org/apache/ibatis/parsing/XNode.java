@@ -32,11 +32,17 @@ import org.w3c.dom.NodeList;
  */
 public class XNode {
 
+  //封装的node节点
   private final Node node;
+  //节点名称
   private final String name;
+  //第一个文本节点内容
   private final String body;
+  //节点属性
   private final Properties attributes;
+  //外部属性，用来替换掉属性中的占位符
   private final Properties variables;
+  //解析器对象
   private final XPathParser xpathParser;
 
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
@@ -52,6 +58,9 @@ public class XNode {
     return new XNode(xpathParser, node, variables);
   }
 
+  /**
+   * 获取父节点
+   */
   public XNode getParent() {
     Node parent = node.getParentNode();
     if (!(parent instanceof Element)) {
@@ -61,6 +70,9 @@ public class XNode {
     }
   }
 
+  /**
+   * 获取节点在文档中的位置
+   */
   public String getPath() {
     StringBuilder builder = new StringBuilder();
     Node current = node;
@@ -74,6 +86,9 @@ public class XNode {
     return builder.toString();
   }
 
+  /**
+   * eg: employee[${id_var}]_test[name]
+   */
   public String getValueBasedIdentifier() {
     StringBuilder builder = new StringBuilder();
     XNode current = this;
@@ -97,6 +112,9 @@ public class XNode {
     return builder.toString();
   }
 
+  /**
+   * 代理给XPathParser执行，相比其他eval方法，多了PropertyParser.parse，解析占位符
+   */
   public String evalString(String expression) {
     return xpathParser.evalString(node, expression);
   }
@@ -109,6 +127,9 @@ public class XNode {
     return xpathParser.evalDouble(node, expression);
   }
 
+  /**
+   * 获取一批节点
+   */
   public List<XNode> evalNodes(String expression) {
     return xpathParser.evalNodes(node, expression);
   }
@@ -177,6 +198,9 @@ public class XNode {
     return getEnumAttribute(enumType, name, null);
   }
 
+  /**
+   * 将属性值转换成对应的枚举，如果没有取默认值
+   */
   public <T extends Enum<T>> T getEnumAttribute(Class<T> enumType, String name, T def) {
     String value = getStringAttribute(name);
     return value == null ? def : Enum.valueOf(enumType,value);

@@ -188,6 +188,8 @@ class XPathParserTest {
   }
 
   private void testEvalMethod(XPathParser parser) {
+    XNode xNode = parser.evalNode("/employee/test");
+    System.out.println(xNode.getValueBasedIdentifier());
     assertEquals((Long) 1970L, parser.evalLong("/employee/birth_date/year"));
     assertEquals((Long) 1970L, parser.evalNode("/employee/birth_date/year").getLongBody());
     assertEquals((short) 6, (short) parser.evalShort("/employee/birth_date/month"));

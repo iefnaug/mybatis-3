@@ -16,6 +16,7 @@
 
 -->
 <employee id="${id_var}">
+  <test>first<![CDATA[1>0]]>second</test>
   <blah something="that"/>
   <first_name>Jim</first_name>
   <last_name>Smith</last_name>
