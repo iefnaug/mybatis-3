@@ -39,12 +39,17 @@ public class GenericTokenParser {
     if (start == -1) {
       return text;
     }
+    //原始字符串的字符数组
     char[] src = text.toCharArray();
+    //当前扫描的位置
     int offset = 0;
+    //保存最后占位符被替换后的字符串
     final StringBuilder builder = new StringBuilder();
+    //保存占位符表达式 ${xxx}
     StringBuilder expression = null;
     do {
       if (start > 0 && src[start - 1] == '\\') {
+        //如果open token被转义，需要去掉'\'
         // this open token is escaped. remove the backslash and continue.
         builder.append(src, offset, start - offset - 1).append(openToken);
         offset = start + openToken.length();

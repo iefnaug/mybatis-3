@@ -52,7 +52,7 @@ class GenericTokenParserTest {
       }
     }));
 
-    assertEquals("James T Kirk reporting.", parser.parse("${first_name} ${initial} ${last_name} reporting."));
+    assertEquals("James T Kirk reporting.", parser.parse("haha ${first_name} gf ${initial} ${last_name} reporting."));
     assertEquals("Hello captain James T Kirk", parser.parse("Hello captain ${first_name} ${initial} ${last_name}"));
     assertEquals("James T Kirk", parser.parse("${first_name} ${initial} ${last_name}"));
     assertEquals("JamesTKirk", parser.parse("${first_name}${initial}${last_name}"));
@@ -110,6 +110,17 @@ class GenericTokenParserTest {
       }
       assertEquals(expected.toString(), parser.parse(input.toString()));
     });
+  }
+
+  @Test
+  public void otherTest() {
+    GenericTokenParser genericTokenParser = new GenericTokenParser("#{", "}", new VariableTokenHandler(new HashMap<String, String>(){
+      {
+        put("name", "gf");
+      }
+    }));
+    String parse = genericTokenParser.parse("I am #{name}");
+    System.out.println(parse);
   }
 
 }

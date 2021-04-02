@@ -242,6 +242,11 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 创建document并验证其格式是否正确
+   * @param inputSource
+   * @return
+   */
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
