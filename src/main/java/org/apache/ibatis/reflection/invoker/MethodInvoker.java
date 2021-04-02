@@ -38,6 +38,9 @@ public class MethodInvoker implements Invoker {
     }
   }
 
+  /**
+   * 调用对象方法
+   */
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException {
     try {

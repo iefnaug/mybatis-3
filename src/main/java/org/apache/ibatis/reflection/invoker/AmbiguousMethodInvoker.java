@@ -29,6 +29,9 @@ public class AmbiguousMethodInvoker extends MethodInvoker {
     this.exceptionMessage = exceptionMessage;
   }
 
+  /**
+   * 封装有歧义的方法，调用时抛出异常
+   */
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException {
     throw new ReflectionException(exceptionMessage);

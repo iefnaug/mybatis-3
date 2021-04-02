@@ -28,6 +28,9 @@ public final class PropertyCopier {
     // Prevent Instantiation of Static Class
   }
 
+  /**
+   * 同类型属性拷贝
+   */
   public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
     Class<?> parent = type;
     while (parent != null) {
@@ -49,6 +52,32 @@ public final class PropertyCopier {
         }
       }
       parent = parent.getSuperclass();
+    }
+  }
+
+  static class Person {
+    private String name;
+
+    public String getName() {
+      return name;
+    }
+
+    public Person setName(String name) {
+      this.name = name;
+      return this;
+    }
+  }
+
+  static class Student extends Person {
+    private String hobby;
+
+    public String getHobby() {
+      return hobby;
+    }
+
+    public Student setHobby(String hobby) {
+      this.hobby = hobby;
+      return this;
     }
   }
 
