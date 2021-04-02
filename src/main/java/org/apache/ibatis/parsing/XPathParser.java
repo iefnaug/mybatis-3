@@ -155,6 +155,12 @@ public class XPathParser {
     return evalString(document, expression);
   }
 
+  /**
+   * 将节点解析为字符串，使用了PropertyParser替换占位符
+   * @param root Node节点
+   * @param expression xpath表达式
+   * @return 字符创
+   */
   public String evalString(Object root, String expression) {
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
     result = PropertyParser.parse(result, variables);
@@ -284,6 +290,12 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 初始化成员变量
+   * @param validation 是否需要验证xml
+   * @param variables 替换占位符的属性变量
+   * @param entityResolver 用于加载约束文件
+   */
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
     this.entityResolver = entityResolver;

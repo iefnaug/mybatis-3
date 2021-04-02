@@ -71,6 +71,9 @@ public class PropertyParser {
       return (variables == null) ? defaultValue : variables.getProperty(key, defaultValue);
     }
 
+    /**
+     * 检测预定义变量中是否有key与占位符匹配，有就替换，没有就原样返回
+     */
     @Override
     public String handleToken(String content) {
       if (variables != null) {

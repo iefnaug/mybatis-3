@@ -30,6 +30,11 @@ public class GenericTokenParser {
     this.handler = handler;
   }
 
+  /**
+   * 解析字符创，如果有占位符存在，委托给TokenHandler处理
+   * @param text
+   * @return
+   */
   public String parse(String text) {
     if (text == null || text.isEmpty()) {
       return "";
