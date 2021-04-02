@@ -26,6 +26,11 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
   private String index;
   private final String children;
 
+  /**
+   * student.name -> name=student, children=name
+   * student[name] -> name=student, children=name
+   * @param fullname
+   */
   public PropertyTokenizer(String fullname) {
     int delim = fullname.indexOf('.');
     if (delim > -1) {
