@@ -42,6 +42,7 @@ import org.apache.ibatis.reflection.invoker.SetFieldInvoker;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 
 /**
+ * 保存某个类型的基本信息
  * This class represents a cached set of class definition information that
  * allows for easy mapping between property names and getter/setter methods.
  *
@@ -81,7 +82,9 @@ public class Reflector {
    * 默认构造方法
    */
   private Constructor<?> defaultConstructor;
-
+  /**
+   * 属性映射   全大写 -> 驼峰
+   */
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
@@ -112,6 +115,7 @@ public class Reflector {
 
   private void addGetMethods(Class<?> clazz) {
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
+    //获取类中所有声明的方法
     Method[] methods = getClassMethods(clazz);
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
@@ -119,7 +123,7 @@ public class Reflector {
   }
 
   /**
-   * 由于父类和子类可能定义相同的方法，这里需要解决冲突
+   * 由于有重载方法，这里需要解决冲突
    * @param conflictingGetters
    */
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
@@ -135,15 +139,19 @@ public class Reflector {
         Class<?> winnerType = winner.getReturnType();
         Class<?> candidateType = candidate.getReturnType();
         if (candidateType.equals(winnerType)) {
+          //同命方法，返回类型相同
           if (!boolean.class.equals(candidateType)) {
+            //非boolean，冲突
             isAmbiguous = true;
             break;
           } else if (candidate.getName().startsWith("is")) {
             winner = candidate;
           }
         } else if (candidateType.isAssignableFrom(winnerType)) {
+          //候选类型是父类
           // OK getter type is descendant
         } else if (winnerType.isAssignableFrom(candidateType)) {
+          //候选类型是子类
           winner = candidate;
         } else {
           isAmbiguous = true;
@@ -160,6 +168,7 @@ public class Reflector {
             "Illegal overloaded getter method with ambiguous type for property ''{0}'' in class ''{1}''. This breaks the JavaBeans specification and can cause unpredictable results.",
             name, method.getDeclaringClass().getName()))
         : new MethodInvoker(method);
+    //放入get方法集合
     getMethods.put(name, invoker);
     Type returnType = TypeParameterResolver.resolveReturnType(method, type);
     getTypes.put(name, typeToClass(returnType));
@@ -258,6 +267,7 @@ public class Reflector {
     Field[] fields = clazz.getDeclaredFields();
     for (Field field : fields) {
       if (!setMethods.containsKey(field.getName())) {
+        //属性没有对应的setter方法，创建一个invoker
         // issue #379 - removed the check for final because JDK 1.5 allows
         // modification of final fields through reflection (JSR-133). (JGB)
         // pr #16 - final static can only be set by the classloader
@@ -267,6 +277,7 @@ public class Reflector {
         }
       }
       if (!getMethods.containsKey(field.getName())) {
+        //属性没有对应的getter方法，创建一个invoker
         addGetField(field);
       }
     }
@@ -328,6 +339,7 @@ public class Reflector {
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
       if (!currentMethod.isBridge()) {
+        //不是桥接方法，加入map
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have
