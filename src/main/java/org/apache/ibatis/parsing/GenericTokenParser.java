@@ -20,8 +20,17 @@ package org.apache.ibatis.parsing;
  */
 public class GenericTokenParser {
 
+  /**
+   * 占位符开始部分
+   */
   private final String openToken;
+  /**
+   * 占位符结束部分
+   */
   private final String closeToken;
+  /**
+   * 将占位属性解析为对应的值
+   */
   private final TokenHandler handler;
 
   public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {
@@ -31,9 +40,8 @@ public class GenericTokenParser {
   }
 
   /**
-   * 解析字符创，如果有占位符存在，委托给TokenHandler处理
-   * @param text
-   * @return
+   * 解析字符串，将占位符解析成对应的值
+   * @param text 待解析的文本
    */
   public String parse(String text) {
     if (text == null || text.isEmpty()) {
