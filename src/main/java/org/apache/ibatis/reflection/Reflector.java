@@ -108,14 +108,16 @@ public class Reflector {
   }
 
   private void addDefaultConstructor(Class<?> clazz) {
+    //获取类中声明的所有构造方法
     Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+    //返回默认构造函数
     Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0)
       .findAny().ifPresent(constructor -> this.defaultConstructor = constructor);
   }
 
   private void addGetMethods(Class<?> clazz) {
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
-    //获取类中所有声明的方法
+    //获取当前类以及父类中所有声明的方法，这里可能包含方法名相同，但返回值不同或入参不同的方法
     Method[] methods = getClassMethods(clazz);
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
@@ -123,13 +125,15 @@ public class Reflector {
   }
 
   /**
-   * 由于有重载方法，这里需要解决冲突
+   * List<Method>.size > 0 需要解决冲突
    * @param conflictingGetters
    */
   private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
     for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
       Method winner = null;
+      //属性名
       String propName = entry.getKey();
+      //记录是否有歧义
       boolean isAmbiguous = false;
       for (Method candidate : entry.getValue()) {
         if (winner == null) {
@@ -139,7 +143,7 @@ public class Reflector {
         Class<?> winnerType = winner.getReturnType();
         Class<?> candidateType = candidate.getReturnType();
         if (candidateType.equals(winnerType)) {
-          //同命方法，返回类型相同
+          //相同的getter方法，返回类型相同
           if (!boolean.class.equals(candidateType)) {
             //非boolean，冲突
             isAmbiguous = true;
@@ -158,17 +162,19 @@ public class Reflector {
           break;
         }
       }
+      //保存到getMethods
       addGetMethod(propName, winner, isAmbiguous);
     }
   }
 
   private void addGetMethod(String name, Method method, boolean isAmbiguous) {
     MethodInvoker invoker = isAmbiguous
+        // 如果有歧义，封装一个抛出异常的方法调用器
         ? new AmbiguousMethodInvoker(method, MessageFormat.format(
             "Illegal overloaded getter method with ambiguous type for property ''{0}'' in class ''{1}''. This breaks the JavaBeans specification and can cause unpredictable results.",
             name, method.getDeclaringClass().getName()))
         : new MethodInvoker(method);
-    //放入get方法集合
+    //放入getMethods方法集合, 后续方法调用都通过反射，属性名 -> 对应的getter方法调用
     getMethods.put(name, invoker);
     Type returnType = TypeParameterResolver.resolveReturnType(method, type);
     getTypes.put(name, typeToClass(returnType));
@@ -339,11 +345,12 @@ public class Reflector {
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
       if (!currentMethod.isBridge()) {
-        //不是桥接方法，加入map
+        //不是桥接方法，加入map，signature = 返回类型#方法名#参数列表
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have
         // overridden a method
+        // 如果父子类有相同的方法，取子类方法
         if (!uniqueMethods.containsKey(signature)) {
           uniqueMethods.put(signature, currentMethod);
         }
