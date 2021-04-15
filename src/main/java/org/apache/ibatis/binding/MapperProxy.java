@@ -30,6 +30,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * mapper执行代理
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

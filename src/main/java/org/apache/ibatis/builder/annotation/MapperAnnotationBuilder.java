@@ -114,6 +114,7 @@ public class MapperAnnotationBuilder {
 
   public void parse() {
     String resource = type.toString();
+    //判断mapper是否被加载过
     if (!configuration.isResourceLoaded(resource)) {
       loadXmlResource();
       configuration.addLoadedResource(resource);

@@ -103,20 +103,42 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
+      //首先提取所有属性
       propertiesElement(root.evalNode("properties"));
+      //获取settings节点下的属性
       Properties settings = settingsAsProperties(root.evalNode("settings"));
+      //配置虚拟文件系统
       loadCustomVfs(settings);
+      /*
+          配置mybatis内部日志实现，如果不手动配置，将按照以下顺序进行日志配置
+          tryImplementation(LogFactory::useSlf4jLogging);
+          tryImplementation(LogFactory::useCommonsLogging);
+          tryImplementation(LogFactory::useLog4J2Logging);
+          tryImplementation(LogFactory::useLog4JLogging);
+          tryImplementation(LogFactory::useJdkLogging);
+          tryImplementation(LogFactory::useNoLogging);
+       */
       loadCustomLogImpl(settings);
+      //注册类型别名
       typeAliasesElement(root.evalNode("typeAliases"));
+      //注册插件
       pluginElement(root.evalNode("plugins"));
+      //配置对象创建工厂
       objectFactoryElement(root.evalNode("objectFactory"));
+      //配置对象工厂wrapper
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      //主要设置Reflector, 用来保存数据库实体对象的信息，字段、getter、setter等方法
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
+      //配置属性
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      //设置默认环境
       environmentsElement(root.evalNode("environments"));
+      //数据库厂商标识
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      //注册类型处理器
       typeHandlerElement(root.evalNode("typeHandlers"));
+      //解析mapper
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -129,6 +151,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
+    // 确保settings节点中配置的属性都在Configuration中
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
@@ -219,11 +242,18 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * 用<property>声明的属性会被resource或url指定的属性覆盖
+   * @param context
+   * @throws Exception
+   */
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
+      //获取所有<property>节点的配置
       Properties defaults = context.getChildrenAsProperties();
       String resource = context.getStringAttribute("resource");
       String url = context.getStringAttribute("url");
+      //resource属性和url属性不能一起设置
       if (resource != null && url != null) {
         throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
       }
